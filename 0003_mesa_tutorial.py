@@ -2,44 +2,9 @@ import mesa
 import random
 import numpy as np
 import matplotlib.pyplot as plt
-
-# resource classes
-class Sugar(mesa.Agent):
-    # increase sugar by one unit per round
-    # contains an amount of sugar
-    def __init__(self, unique_id, model, pos, max_sugar):
-        super().__init__(unique_id, model)
-        self.pos
-        self.amount = max_sugar
-        self.max_sugar = max_sugar
+from resources import *
+from trader import Trader
         
-
-class Spice(mesa.Agent):
-    # increase spice by one unit per round
-    # contains an amount of spice
-    def __init__(self, unique_id, model, pos, max_spice):
-        super().__init__(unique_id, model)
-        self.pos = pos
-        self.amount = max_spice
-        self.max_spice = max_spice
-
-        
-        
-
-class Trader(mesa.Agent):
-    # trader has a metabolism (processes sugar and spice per turn)
-    # harvest sugar and spice
-    def __init__(self, unique_id, model, pos, moore=False, sugar=0, spice=0, metabolism_sugar=0, metabolism_spice=0, vision=0):
-        super().__init__(unique_id, model)
-        
-        self.pos = pos
-        self.moore = moore
-        self.sugar = sugar
-        self.spice = spice
-        self.metabolism_sugar = metabolism_sugar
-        self.metabolism_spice = metabolism_spice
-        self.vision = vision
-
 class SugarscapeG1mt(mesa.Model):
     '''
     model class to manage sugarscape with traders (g1mt)
@@ -73,22 +38,21 @@ class SugarscapeG1mt(mesa.Model):
                 max_amount = resource[x, y]
                 if max_amount == 0:
                     continue
-                resource_instance = resource_class(self.agent_id, self, (x, y), max_amount)
+                resource_instance = resource_class(self.get_agent_id(), self, (x, y), max_amount)
                 self.grid.place_agent(resource_instance, (x, y))
                 self.schedule.add(resource_instance)
-                self.agent_id += 1
     
     def generate_traders(self):
         for i in range(self.initial_population):
 
-            sugar = int(random.uniform(self.endowment_min, self.endowment_max))
-            spice = int(random.uniform(self.endowment_min, self.endowment_max))
-            metab_sugar = int(random.uniform(self.metabolism_min, self.metabolism_max))
-            metab_spice = int(random.uniform(self.metabolism_min, self.metabolism_max))
-            vision = int(random.uniform(self.vision_min, self.vision_max))
+            sugar = int(random.uniform(self.endowment_min, self.endowment_max+1))
+            spice = int(random.uniform(self.endowment_min, self.endowment_max+1))
+            metab_sugar = int(random.uniform(self.metabolism_min, self.metabolism_max+1))
+            metab_spice = int(random.uniform(self.metabolism_min, self.metabolism_max+1))
+            vision = int(random.uniform(self.vision_min, self.vision_max+1))
             posn = (np.random.randint(0, self.width), 
                     np.random.randint(0, self.height))
-            trader = Trader(self.agent_id, 
+            trader = Trader(self.get_agent_id(), 
                             self,
                             posn,
                             sugar = sugar,
@@ -98,8 +62,13 @@ class SugarscapeG1mt(mesa.Model):
                             vision = vision)
             self.grid.place_agent(trader, posn) 
             self.schedule.add(trader)
-            self.agent_id += 1
             print(trader.unique_id, trader.sugar, trader.metabolism_spice)
+
+    def get_agent_id(self):
+        id = self.agent_id
+        self.agent_id += 1
+        return id
+    
 
 
 model = SugarscapeG1mt()
