@@ -4,6 +4,5 @@ from engine import SugarscapeG1mt
 if __name__ == '__main__':
 
     model = SugarscapeG1mt()
-    for i in range(5):
-        model.step()
+    model.run_model(step_count=1)
     apple = 1

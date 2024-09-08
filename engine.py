@@ -71,8 +71,34 @@ class SugarscapeG1mt(mesa.Model):
             self.schedule.add(trader)
  
     def step(self):
+        '''
+        staged activation of resources
+        random activation of traders
+        '''
+        
         for sugar in self.schedule.agents_by_type[Sugar].values():
             sugar.step()
+
+        for spice in self.schedule.agents_by_type[Spice].values():
+            spice.step()
+        
+        # step trader agents
+        # account for trader agent death and removal
+        traders_shuffle = list(self.schedule.agents_by_type[Trader].values())
+        random.shuffle(traders_shuffle)
+        for agent in traders_shuffle:
+            agent.move()
+        # not using the normal "self.schedule.step" method that advances mesa's step and timing tracker.  
+        # manually advancing scheduler here
+        self.schedule.steps += 1
+        
+
+
+        # time not necessary for current model.  will let remain at zero.
+    
+    def run_model(self, step_count=1000):
+        for i in range(step_count):
+            self.step()
 
 
 if __name__ == '__main__':

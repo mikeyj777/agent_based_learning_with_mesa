@@ -13,3 +13,10 @@ class Trader(mesa.Agent):
         self.metabolism_sugar = metabolism_sugar
         self.metabolism_spice = metabolism_spice
         self.vision = vision
+    
+    def move(self):
+        # print(f'I am agent {self.unique_id}, currently at {self.pos}.  I am about to move.')
+        if self.model.grid.is_cell_empty(self.pos):
+            self.model.grid.place_agent(self, self.pos)
+        else:
+            self.model.grid.move_agent(self, self.pos)

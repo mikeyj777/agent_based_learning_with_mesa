@@ -17,7 +17,6 @@ class Sugar(mesa.Agent):
         Sugar is consumed if it reaches max
         '''
         self.amount = min(self.amount + 1, self.max_sugar)
-        print(self.unique_id, self.amount, self.max_sugar)
         
 
 class Spice(mesa.Agent):
@@ -32,8 +31,7 @@ class Spice(mesa.Agent):
     def step(self):
 
         '''
-        Sugar grows by one unit per round
-        Sugar is consumed if it reaches max
+         grows by one unit per round
+         is consumed if it reaches max
         '''
-        self.amount = min(self.amount + 1, self.max_sugar)
-        print(self.unique_id, self.amount, self.max_sugar)
+        self.amount = min(self.amount + 1, self.max_spice)
