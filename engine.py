@@ -29,16 +29,23 @@ class SugarscapeG1mt(mesa.Model):
         self.populate_resources()
         self.generate_traders()
 
+
+    def get_agent_id(self):
+        id = self.agent_id
+        self.agent_id += 1
+        return id
+
     def populate_resources(self):
         self.sugar_distribution = np.genfromtxt('data/sugar-map.txt')
         self.spice_distribution = np.flip(self.sugar_distribution, axis=1)
 
         for _, x, y in self.grid.coord_iter():
-            for resource, resource_class in zip([self.sugar_distribution, self.spice_distribution], [Sugar, Spice]):
+            for resource, resource_class, max_resource_attribute in zip([self.sugar_distribution, self.spice_distribution], [Sugar, Spice], ['max_sugar', 'max_spice']):
                 max_amount = resource[x, y]
                 if max_amount == 0:
                     continue
-                resource_instance = resource_class(self.get_agent_id(), self, (x, y), max_amount)
+                resource_instance = resource_class(self.get_agent_id(), self, (x, y))
+                setattr(resource_instance, max_resource_attribute, max_amount)
                 self.grid.place_agent(resource_instance, (x, y))
                 self.schedule.add(resource_instance)
     
@@ -62,15 +69,14 @@ class SugarscapeG1mt(mesa.Model):
                             vision = vision)
             self.grid.place_agent(trader, posn) 
             self.schedule.add(trader)
-            print(trader.unique_id, trader.sugar, trader.metabolism_spice)
-
-    def get_agent_id(self):
-        id = self.agent_id
-        self.agent_id += 1
-        return id
-    
+ 
+    def step(self):
+        for sugar in self.schedule.agents_by_type[Sugar].values():
+            sugar.step()
 
 
-model = SugarscapeG1mt()
+if __name__ == '__main__':
 
-apple = 1
+    model = SugarscapeG1mt()
+
+    apple = 1
