@@ -70,6 +70,13 @@ class SugarscapeG1mt(mesa.Model):
             self.grid.place_agent(trader, posn) 
             self.schedule.add(trader)
  
+
+    def randomize_traders(self):
+        traders_shuffle = list(self.schedule.agents_by_type[Trader].values())
+        random.shuffle(traders_shuffle)
+
+        return traders_shuffle
+
     def step(self):
         '''
         staged activation of resources
@@ -84,13 +91,18 @@ class SugarscapeG1mt(mesa.Model):
         
         # step trader agents
         # account for trader agent death and removal
-        traders_shuffle = list(self.schedule.agents_by_type[Trader].values())
-        random.shuffle(traders_shuffle)
+
+        traders_shuffle = self.randomize_traders()
+        
         agent:Trader
         for agent in traders_shuffle:
             agent.move()
             agent.eat()
             agent.maybe_die()
+
+        traders_shuffle = self.randomize_traders()
+        for agent in traders_shuffle:
+            agent.trade_with_neighbors()
         # not using the normal "self.schedule.step" method that advances mesa's step and timing tracker.  
         # manually advancing scheduler here
         self.schedule.steps += 1

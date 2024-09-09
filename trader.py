@@ -40,16 +40,41 @@ class Trader(mesa.Agent):
         '''
         fxn to remove traders who have consumed all of their sugar or spice
         '''
-        print(f'checking if trader {self.unique_id} should die.  current sugar: {self.sugar}, spice: {self.spice}')
+        # print(f'checking if trader {self.unique_id} should die.  current sugar: {self.sugar}, spice: {self.spice}')
         if self.is_starved():
             traders_before_pruning = self.model.schedule.get_type_count(Trader)
             self.model.grid.remove_agent(self)
             self.model.schedule.remove(self)
 
-            print(f'Trader {self.unique_id} died.  initial number of traders: {traders_before_pruning}.  current number of traders:  {self.model.schedule.get_type_count(Trader)}')
+            # print(f'Trader {self.unique_id} died.  initial number of traders: {traders_before_pruning}.  current number of traders:  {self.model.schedule.get_type_count(Trader)}')
             apple = 1
 
+    def get_trader(self, pos):
+        this_cell = self.model.grid.get_cell_list_contents(pos)
+        for a in this_cell:
+            # check if it's occupied by another trader
+            if isinstance(a, Trader):
+                return a
 
+        return None
+
+    def trade_with_neighors(self):
+        '''
+        1. identify neighbors
+        2. trade (2 sessions)
+        3. collect data
+        
+        '''
+
+        # 1. identify neighbors
+        neighbor_agents = [self.get_trader(pos) for pos in 
+                           self.model.grid.get_neighborhood(self.pos, self.moore, False, self.vision)
+                           if self.is_occupied_by_other(pos)
+                           ]
+        # 2. trade
+        for neighbor in neighbor_agents:
+            # 3. collect data
+            pass
 
     def is_occupied_by_other(self, pos):
         if pos == self.pos:
@@ -165,3 +190,4 @@ class Trader(mesa.Agent):
         # self.model.grid.move_agent(self, final_candidates[0])
 
         apple = 1
+    
