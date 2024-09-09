@@ -18,6 +18,39 @@ class Trader(mesa.Agent):
         self.metabolism_spice = metabolism_spice
         self.vision = vision
     
+    def eat(self):
+        print(f'I am agent {self.unique_id}, currently at {self.pos}.  I am about to eat.  my stuff: {self.sugar} sugar, {self.spice} spice')
+        sugar_patch = self.get_sugar(self.pos)
+        if sugar_patch is not None:
+            self.sugar += sugar_patch.amount
+            sugar_patch.amout = 0
+        self.sugar -= self.metabolism_sugar
+        self.sugar = max(0, self.sugar)
+
+        spice_patch = self.get_spice(self.pos)
+        if spice_patch is not None:
+            self.spice += spice_patch.amount
+            spice_patch.amout = 0
+        self.spice -= self.metabolism_spice
+        self.spice = max(0, self.spice)
+
+        print(f'I am agent {self.unique_id}, currently at {self.pos}.  I ate. my remaining stuff: {self.sugar} sugar, {self.spice} spice')
+        
+        apple = 1
+
+    def is_starved(self):
+        return (self.sugar <= 0) or (self.spice <= 0)
+
+    def maybe_die(self):
+        '''
+        fxn to remove traders who have consumed all of their sugar or spice
+        '''
+        if self.is_starved():
+            self.model.grid.remove_agent(self)
+            self.model.schedule.remove(self)
+
+
+
     def is_occupied_by_other(self, pos):
         if pos == self.pos:
             # agent can stay in same spot.  not considered occupied
@@ -42,6 +75,7 @@ class Trader(mesa.Agent):
     def get_sugar(self, pos):
         '''
         helper for part 2 of move.
+        also in self.eat()
         '''
         this_cell = self.model.grid.get_cell_list_contents(pos)
         for agent in this_cell:
@@ -125,9 +159,10 @@ class Trader(mesa.Agent):
 
         min_dist = min(distances)
 
-        final_candidates = [i for i, x in enumerate(distances) if math.isclose(x, min_dist, rel_tol=1e-02)]  
+        final_candidate_idxs = [i for i, x in enumerate(distances) if math.isclose(x, min_dist, rel_tol=1e-02)]  
 
-        print(f'min_dist: {min_dist}.  final_candidates: {final_candidates}.  ')
+        final_candidates = [candidate_positions[i] for i in final_candidate_idxs]
+        # print(f'min_dist: {min_dist}.  final_candidates: {final_candidates}.  ')
         
         self.random.shuffle(final_candidates)
 

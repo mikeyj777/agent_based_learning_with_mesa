@@ -86,8 +86,10 @@ class SugarscapeG1mt(mesa.Model):
         # account for trader agent death and removal
         traders_shuffle = list(self.schedule.agents_by_type[Trader].values())
         random.shuffle(traders_shuffle)
+        agent:Trader
         for agent in traders_shuffle:
             agent.move()
+            agent.eat()
         # not using the normal "self.schedule.step" method that advances mesa's step and timing tracker.  
         # manually advancing scheduler here
         self.schedule.steps += 1
