@@ -90,6 +90,7 @@ class SugarscapeG1mt(mesa.Model):
         for agent in traders_shuffle:
             agent.move()
             agent.eat()
+            agent.maybe_die()
         # not using the normal "self.schedule.step" method that advances mesa's step and timing tracker.  
         # manually advancing scheduler here
         self.schedule.steps += 1

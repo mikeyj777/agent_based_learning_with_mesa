@@ -19,7 +19,6 @@ class Trader(mesa.Agent):
         self.vision = vision
     
     def eat(self):
-        print(f'I am agent {self.unique_id}, currently at {self.pos}.  I am about to eat.  my stuff: {self.sugar} sugar, {self.spice} spice')
         sugar_patch = self.get_sugar(self.pos)
         if sugar_patch is not None:
             self.sugar += sugar_patch.amount
@@ -34,10 +33,6 @@ class Trader(mesa.Agent):
         self.spice -= self.metabolism_spice
         self.spice = max(0, self.spice)
 
-        print(f'I am agent {self.unique_id}, currently at {self.pos}.  I ate. my remaining stuff: {self.sugar} sugar, {self.spice} spice')
-        
-        apple = 1
-
     def is_starved(self):
         return (self.sugar <= 0) or (self.spice <= 0)
 
@@ -45,9 +40,14 @@ class Trader(mesa.Agent):
         '''
         fxn to remove traders who have consumed all of their sugar or spice
         '''
+        print(f'checking if trader {self.unique_id} should die.  current sugar: {self.sugar}, spice: {self.spice}')
         if self.is_starved():
+            traders_before_pruning = self.model.schedule.get_type_count(Trader)
             self.model.grid.remove_agent(self)
             self.model.schedule.remove(self)
+
+            print(f'Trader {self.unique_id} died.  initial number of traders: {traders_before_pruning}.  current number of traders:  {self.model.schedule.get_type_count(Trader)}')
+            apple = 1
 
 
 
@@ -80,7 +80,6 @@ class Trader(mesa.Agent):
         this_cell = self.model.grid.get_cell_list_contents(pos)
         for agent in this_cell:
             if type(agent) is Sugar:
-                # print(f'Sugar {agent.amount} at {agent.pos}')
                 return agent
         return None
 
@@ -91,7 +90,6 @@ class Trader(mesa.Agent):
         this_cell = self.model.grid.get_cell_list_contents(pos)
         for agent in this_cell:
             if type(agent) is Spice:
-                # print(f'Spice {agent.amount} at {agent.pos}')
                 return agent
         return None
     
@@ -115,7 +113,6 @@ class Trader(mesa.Agent):
         
 
     def move(self):
-        # print(f'I am agent {self.unique_id}, currently at {self.pos}.  I am about to move.')
         '''
         find optimal move in 4 parts
         1.  identify all possible moves
@@ -125,7 +122,6 @@ class Trader(mesa.Agent):
         '''
         # optimal in 4 parts
         # 1. get all neighbors
-        print('\n--------------------\n')
         
         # all_neighbors = self.model.grid.get_neighborhood(self.pos, self.moore, True, self.vision)
         # available_spots = []
@@ -162,7 +158,6 @@ class Trader(mesa.Agent):
         final_candidate_idxs = [i for i, x in enumerate(distances) if math.isclose(x, min_dist, rel_tol=1e-02)]  
 
         final_candidates = [candidate_positions[i] for i in final_candidate_idxs]
-        # print(f'min_dist: {min_dist}.  final_candidates: {final_candidates}.  ')
         
         self.random.shuffle(final_candidates)
 
