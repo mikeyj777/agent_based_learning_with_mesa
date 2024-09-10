@@ -58,7 +58,48 @@ class Trader(mesa.Agent):
 
         return None
 
-    def trade_with_neighors(self):
+    def calculate_MRS(self):
+        '''
+        
+        need for x / willingness to part with y
+
+        more spice and a lower metabolism of spice indicates that trader will have an abundance of spice.
+        if they have the same for sugar, then the MRS approaches one, and trader is too happy to trade.
+        an MRS >> 1 indicates a willingness to trade Spice.
+        an MRS << 1 indicates a willingness to trade Sugar.
+        
+        '''
+        return (self.spice / self.metabolism_spice) / (self.sugar / self.metabolism_sugar)
+
+    def trade(self, other):
+        '''
+        
+        helper function for trade_with_neighbors
+        'other' is a trader object
+        
+        '''
+
+        # sanity check to verify code is ok:
+        assert self.sugar > 0
+        assert self.spice > 0
+        assert other.sugar > 0
+        assert other.spice > 0
+        
+        # calculate marginal rate of substitution - "Growing Artificial Socieities - p. 101"
+        mrs_self = self.calculate_MRS()
+        mrs_other = other.calculate_MRS()
+        # print(f'my mrs: {mrs_self}, other agent mrs: {mrs_other}')
+
+        if math.isclose(mrs_self, mrs_other, rel_tol=0.01):
+            print('mrs values are close')
+            # traders with similar MRS do not want to trade
+            return
+
+        p = math.sqrt(mrs_self * mrs_other)
+        print(f'price: {p}')
+
+
+    def trade_with_neighbors(self):
         '''
         1. identify neighbors
         2. trade (2 sessions)
@@ -71,10 +112,15 @@ class Trader(mesa.Agent):
                            self.model.grid.get_neighborhood(self.pos, self.moore, False, self.vision)
                            if self.is_occupied_by_other(pos)
                            ]
-        # 2. trade
+        
+        # if no neighbors, return empty lists for trade price and traders
+        if len(neighbor_agents) == 0:
+            return [], []
+
         for neighbor in neighbor_agents:
-            # 3. collect data
-            pass
+            if neighbor:
+                self.trade(neighbor)
+
 
     def is_occupied_by_other(self, pos):
         if pos == self.pos:
